@@ -1,8 +1,8 @@
+require("dotenv").config();
 const express = require("express");
 const mongoose = require("mongoose");
 const bodyParser = require("body-parser");
 const path = require("path");
-
 const authRoutes = require("./routes/auth");
 const adminRoutes = require("./routes/admin");
 const providerRoutes = require("./routes/provider");
@@ -10,15 +10,10 @@ const userRoutes = require("./routes/user");
 
 const app = express();
 
-const userName = "praveenterax";
-const password = "NblCRcF6hjo1BC3s";
-
-const MONGO_URI = `mongodb+srv://${userName}:${password}@cluster0.tbhhh.mongodb.net/jobPortal?retryWrites=true&w=majority`;
+const MONGO_URI = process.env.MONGO_URI;
+const PORT = process.env.PORT || 8080;
 
 app.use(bodyParser.json());
-
-// app.use("/resumes", express.static(path.join(__dirname, "resumes")));
-
 app.use((req, res, next) => {
   res.setHeader("Access-Control-Allow-Origin", "*");
   res.setHeader("Access-Control-Allow-Methods", "GET,POST,PUT,PATCH,DELETE");
@@ -35,7 +30,6 @@ app.use((error, req, res, next) => {
   const status = error.statusCode || 500;
   const message = error.message;
   const data = error.data;
-
   res.status(status).json({
     message: message,
     data: data,
@@ -45,8 +39,10 @@ app.use((error, req, res, next) => {
 mongoose
   .connect(MONGO_URI)
   .then((result) => {
-    console.log("Connected to Database");
-    app.listen(8080);
+    console.log("Connected to Database ✅");
+    app.listen(PORT, () => {
+      console.log(`Server running on port ${PORT} 🚀`);
+    });
   })
   .catch((err) => {
     console.log(err);
