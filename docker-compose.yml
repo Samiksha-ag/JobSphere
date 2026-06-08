@@ -1,0 +1,30 @@
+version: '3.8'
+
+services:
+  # Backend Service
+  backend:
+    build: ./job-backend
+    container_name: jobsphere-backend
+    ports:
+      - "8080:8080"
+    environment:
+      - MONGO_URI=${MONGO_URI}
+      - PORT=${PORT}
+      - JWT_SECRET=${JWT_SECRET}
+    volumes:
+      - ./job-backend:/app
+      - /app/node_modules
+    restart: always
+
+  # Frontend Service
+  frontend:
+    build: ./job-frontend
+    container_name: jobsphere-frontend
+    ports:
+      - "3000:3000"
+    depends_on:
+      - backend
+    volumes:
+      - ./job-frontend:/app
+      - /app/node_modules
+    restart: always
