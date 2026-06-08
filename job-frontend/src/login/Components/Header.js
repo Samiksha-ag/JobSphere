@@ -14,7 +14,7 @@ function Header() {
                 className="bi bi-search"
                 style={{ fontSize: "1.75rem", margin: "0px 6px" }}
               ></i>
-              <h1>JOBHUNT </h1>
+              <h1>JobSphere </h1>
             </span>
           </Navbar.Brand>
           <Navbar.Toggle

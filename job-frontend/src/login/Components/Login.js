@@ -105,7 +105,7 @@ const Login = () => {
       <Header />
       <Container className="mb-5 ">
         <h1 className="   p-3 text-center rounded" style={{ color: "#2c49ed" }}>
-          Login to your Job Portal
+          Login to your JobSphere
         </h1>
         <Row className="mb-5">
           <Col
