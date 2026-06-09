@@ -1,15 +1,9 @@
 import React from "react";
-
 import { Link, useNavigate, NavLink } from "react-router-dom";
-import classes from "./Navigation.module.css";
-import { Navbar, Container, Nav, Dropdown } from "react-bootstrap";
 import { useDispatch } from "react-redux";
 import jwtDecode from "jwt-decode";
 
 const Navigation = () => {
-  // const selectauthToken = (rootstate) => rootstate.authToken;
-  // const authToken = useSelector(selectauthToken);
-  // console.log(authToken);
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
@@ -21,173 +15,147 @@ const Navigation = () => {
     navigate("/", { replace: true });
   };
 
-  return (
-    <Navbar
-      fixed="top"
-      variant="dark"
-      expand="md"
-      bg="primary"
-      className={classes.nav}
-    >
-      <Container fluid>
-        {/* <Navbar.Brand href="/dashboard" className={classes.brand}>
-          JobSphere
-        </Navbar.Brand> */}
+  const styles = {
+    navbar: {
+      background: "linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%)",
+      padding: "0 32px",
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "space-between",
+      height: "65px",
+      boxShadow: "0 4px 20px rgba(0,0,0,0.3)",
+      position: "fixed",
+      top: 0,
+      left: 0,
+      right: 0,
+      zIndex: 1000,
+    },
+    logo: {
+      display: "flex",
+      alignItems: "center",
+      gap: "10px",
+      textDecoration: "none",
+    },
+    logoText: {
+      color: "white",
+      fontSize: "22px",
+      fontWeight: "800",
+      margin: 0,
+      letterSpacing: "1px",
+    },
+    logoSpan: { color: "#4cc9f0" },
+    navLinks: {
+      display: "flex",
+      alignItems: "center",
+      gap: "8px",
+    },
+    navLink: {
+      color: "#a0aec0",
+      textDecoration: "none",
+      padding: "8px 16px",
+      borderRadius: "8px",
+      fontSize: "14px",
+      fontWeight: "600",
+    },
+    activeLink: {
+      color: "white",
+      textDecoration: "none",
+      padding: "8px 16px",
+      borderRadius: "8px",
+      fontSize: "14px",
+      fontWeight: "600",
+      background: "rgba(255,255,255,0.15)",
+    },
+    rightSection: {
+      display: "flex",
+      alignItems: "center",
+      gap: "12px",
+    },
+    username: {
+      color: "white",
+      fontSize: "14px",
+      fontWeight: "600",
+    },
+    logoutBtn: {
+      background: "rgba(255,255,255,0.1)",
+      color: "white",
+      border: "1px solid rgba(255,255,255,0.2)",
+      padding: "8px 18px",
+      borderRadius: "8px",
+      fontSize: "14px",
+      fontWeight: "600",
+      cursor: "pointer",
+    },
+  };
 
-        <NavLink
-          // activeClassName={classes.active}
-          className={classes.brand}
-          to="/dashboard"
-        >
-          <span className={classes.logo}>
-            <i className="bi bi-search"></i>
-          </span>
-          JobSphere
-        </NavLink>
-        <Navbar.Toggle aria-controls="navbar-dark-example" />
-        <Navbar.Collapse id="navbar-dark-example">
+  const getLinkStyle = ({ isActive }) =>
+    isActive ? styles.activeLink : styles.navLink;
+
+  return (
+    <>
+      <nav style={styles.navbar}>
+        {/* Logo */}
+        <Link to="/dashboard" style={styles.logo}>
+          <span style={{ fontSize: "24px" }}>🔍</span>
+          <h1 style={styles.logoText}>
+            Job<span style={styles.logoSpan}>Sphere</span>
+          </h1>
+        </Link>
+
+        {/* Nav Links based on role */}
+        <div style={styles.navLinks}>
           {redAuthToken.role === "Admin" && (
-            <Nav className={`me-auto ${classes.pageLinks}`}>
-              <NavLink
-                className={(navData) =>
-                  navData.isActive ? classes.active : ""
-                }
-                to="/manage-users"
-              >
-                Users
+            <>
+              <NavLink to="/manage-users" style={getLinkStyle}>
+                👥 Users
               </NavLink>
-              <NavLink
-                className={(navData) =>
-                  navData.isActive ? classes.active : ""
-                }
-                to="/manage-jobs"
-              >
-                Jobs
+              <NavLink to="/manage-jobs" style={getLinkStyle}>
+                💼 Jobs
               </NavLink>
-              <NavLink
-                className={(navData) =>
-                  navData.isActive ? classes.active : ""
-                }
-                to="/reports"
-              >
-                Reports
+              <NavLink to="/reports" style={getLinkStyle}>
+                📊 Reports
               </NavLink>
-            </Nav>
+            </>
           )}
           {redAuthToken.role === "Job Provider" && (
-            <Nav className={`me-auto ${classes.pageLinks}`}>
-              <NavLink
-                className={(navData) =>
-                  navData.isActive ? classes.active : ""
-                }
-                to="/manage-applicants"
-              >
-                Applicant
+            <>
+              <NavLink to="/manage-applicants" style={getLinkStyle}>
+                👥 Applicants
               </NavLink>
-              <NavLink
-                className={(navData) =>
-                  navData.isActive ? classes.active : ""
-                }
-                to="/manage-jobs"
-              >
-                Jobs
+              <NavLink to="/manage-jobs" style={getLinkStyle}>
+                💼 Jobs
               </NavLink>
-              <NavLink
-                className={(navData) =>
-                  navData.isActive ? classes.active : ""
-                }
-                to="/provider-report"
-              >
-                Reports
+              <NavLink to="/provider-report" style={getLinkStyle}>
+                📊 Reports
               </NavLink>
-            </Nav>
+            </>
           )}
           {redAuthToken.role === "User" && (
-            <Nav className={`me-auto ${classes.pageLinks}`}>
-              <NavLink
-                className={(navData) =>
-                  navData.isActive ? classes.active : ""
-                }
-                to="/dashboard"
-              >
-                Apply
+            <>
+              <NavLink to="/dashboard" style={getLinkStyle}>
+                🔍 Apply
               </NavLink>
-              <NavLink
-                className={(navData) =>
-                  navData.isActive ? classes.active : ""
-                }
-                to="/appliedJobs"
-              >
-                Applied Jobs
+              <NavLink to="/appliedJobs" style={getLinkStyle}>
+                📋 Applied Jobs
               </NavLink>
-              {/* <NavLink
-                className={(navData) =>
-                  navData.isActive ? classes.active : ""
-                }
-                to="/ProviderReport"
-                onClick={(event) => event.preventDefault()}
-              >
-                Reports
-              </NavLink> */}
-            </Nav>
+            </>
           )}
-          <Nav>
-            {/* <NavDropdown
-              id="nav-dropdown-dark-example"
-              title={
-                <span className={classes.username}>
-                  <span className={classes.userLogo}>
-                    <i className="bi bi-person-circle"></i>
-                  </span>
-                  {authToken.username}
-                </span>
-              }
-              menuVariant="light"
-              align="end"
-              className={classes.user}
-              as={"button"}
-            >
-              <NavDropdown.Item>
-                <NavLink
-                  className={classes.changePassword}
-                  to="/change-password"
-                >
-                  Change Password
-                </NavLink>
-              </NavDropdown.Item>
-              <NavDropdown.Divider />
+        </div>
 
-              <Dropdown.Item href="/login">Logout</Dropdown.Item>
-            </NavDropdown>
-          </Nav> */}
-            <Dropdown align={"end"} className={classes.dropDown}>
-              <Dropdown.Toggle className={classes.user}>
-                <span className={classes.username}>
-                  <span className={classes.userLogo}>
-                    <i className="bi bi-person-circle"></i>
-                  </span>
-                  {redAuthToken.userName}
-                </span>
-              </Dropdown.Toggle>
+        {/* Right Section */}
+        <div style={styles.rightSection}>
+          <span style={styles.username}>
+            👤 {redAuthToken.userName}
+          </span>
+          <button style={styles.logoutBtn} onClick={logoutHandler}>
+            🚪 Logout
+          </button>
+        </div>
+      </nav>
 
-              <Dropdown.Menu>
-                <Link to="/change-password" className={classes.changePassword}>
-                  Change Password
-                </Link>
-                <Dropdown.Divider />
-                <Dropdown.Item
-                  as={"button"}
-                  onClick={logoutHandler}
-                  className={classes.changePassword}
-                >
-                  Logout
-                </Dropdown.Item>
-              </Dropdown.Menu>
-            </Dropdown>
-          </Nav>
-        </Navbar.Collapse>
-      </Container>
-    </Navbar>
+      {/* Spacer to push content below fixed navbar */}
+      <div style={{ height: "65px" }}></div>
+    </>
   );
 };
 
