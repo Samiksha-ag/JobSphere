@@ -1,7 +1,7 @@
 {
   "SERVER_URL": "http://localhost:8080/",
   "TITLE": {
-    "APP_TITLE": "JOB HUNT",
+    "APP_TITLE": "JobSphere",
     "LOGIN": "Login",
     "FORGOT_PASSWORD": "Forgot Password",
     "CHANGE_PASSWORD": "Change Password",

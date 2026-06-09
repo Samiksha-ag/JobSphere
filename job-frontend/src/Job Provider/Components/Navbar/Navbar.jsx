@@ -8,14 +8,14 @@ const Navbar1 = () => {
     <Navbar variant="dark" expand="md" className={classes.nav}>
       <Container fluid>
         {/* <Navbar.Brand href="/dashboard" className={classes.brand}>
-          Job Hunt
+          JobSphere
         </Navbar.Brand> */}
         <NavLink
           // activeClassName={classes.active}
           className={classes.brand}
           to="/"
         >
-          Job Hunt
+        JobSphere
         </NavLink>
         <Navbar.Toggle aria-controls="navbar-dark-example" />
         <Navbar.Collapse id="navbar-dark-example">

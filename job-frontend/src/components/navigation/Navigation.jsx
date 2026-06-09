@@ -31,7 +31,7 @@ const Navigation = () => {
     >
       <Container fluid>
         {/* <Navbar.Brand href="/dashboard" className={classes.brand}>
-          Job Hunt
+          JobSphere
         </Navbar.Brand> */}
 
         <NavLink
@@ -42,7 +42,7 @@ const Navigation = () => {
           <span className={classes.logo}>
             <i className="bi bi-search"></i>
           </span>
-          Job Hunt
+          JobSphere
         </NavLink>
         <Navbar.Toggle aria-controls="navbar-dark-example" />
         <Navbar.Collapse id="navbar-dark-example">
