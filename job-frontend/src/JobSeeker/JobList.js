@@ -1,8 +1,6 @@
 import React from "react";
 import { useState, useEffect } from "react";
 import axios from "axios";
-import { io } from "socket.io-client";
-import jwtDecode from "jwt-decode";
 import Jobitem from "./Job_item";
 import ApplyModal from "./ApplyModal";
 import Config from "../config/Config.json";
@@ -30,17 +28,6 @@ const Jobs = () => {
       )
     );
   };
-
-  // Register user with socket for online status
-  useEffect(() => {
-    const token = localStorage.getItem("token");
-    if (token) {
-      const decoded = jwtDecode(token);
-      const socket = io("http://localhost:8080");
-      socket.emit("register", decoded.userId);
-      return () => socket.disconnect();
-    }
-  }, []);
 
   useEffect(() => {
     setLoading(true);
