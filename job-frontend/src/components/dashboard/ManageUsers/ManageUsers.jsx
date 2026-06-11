@@ -99,8 +99,8 @@ const ManageUsers = (props) => {
               onChange={roleChangeHandler}
             >
               <option value="All">All</option>
-              <option value="User">User</option>
-              <option value="Job Provider">Job Provider</option>
+              <option value="User">Applicant</option>
+              <option value="Job Provider">Recruiter</option>
             </select>
           </Col>
         </Col>

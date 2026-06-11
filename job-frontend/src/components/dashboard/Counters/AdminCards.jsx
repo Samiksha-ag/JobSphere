@@ -3,9 +3,6 @@ import AdminCard from "./AdminCard";
 import React from "react";
 import { Col, Row } from "react-bootstrap";
 
-// import userData from "../../../store/userData.json";
-// import jobData from "../../../store/jobData.json";
-
 const AdminCards = ({ stats, ...props }) => {
   return (
     <Row>
@@ -21,7 +18,7 @@ const AdminCards = ({ stats, ...props }) => {
         <AdminCard
           color="#fa3535"
           logo={<i className="bi bi-file-earmark-person-fill"></i>}
-          heading={"Total Applicants"}
+          heading={"Total Applications"}
           statistics={stats.applicantCount}
           caption={""}
         />
@@ -39,7 +36,7 @@ const AdminCards = ({ stats, ...props }) => {
         <AdminCard
           color="#ff5500"
           logo={<i className="bi bi-person-circle"></i>}
-          heading={"Total Users"}
+          heading={"Total Applicants"}
           statistics={stats.seekerCount}
           caption={""}
         />

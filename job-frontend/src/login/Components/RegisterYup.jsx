@@ -278,8 +278,8 @@ const Register = (props) => {
                   <Field name="role">
                     {({ field }) => (
                       <select {...field} style={styles.select}>
-                        <option value="User">Job Seeker</option>
-                        <option value="Job Provider">Job Provider / Recruiter</option>
+                        <option value="User">Applicant</option>
+                        <option value="Job Provider">Recruiter</option>
                       </select>
                     )}
                   </Field>

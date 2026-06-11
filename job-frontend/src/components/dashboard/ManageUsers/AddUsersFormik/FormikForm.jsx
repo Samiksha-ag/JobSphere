@@ -183,8 +183,8 @@ const FormikForm = (props) => {
                 label="Role"
                 mandatory={"true"}
               >
-                <option value="User">User</option>
-                <option value="Job Provider">Job Provider</option>
+                <option value="User">Applicant</option>
+                <option value="Job Provider">Recruiter</option>
               </SelectInput>
             </div>
           </Form>

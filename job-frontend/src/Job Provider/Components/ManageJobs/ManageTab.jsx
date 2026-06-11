@@ -3,7 +3,6 @@ import { Row, Col, Button, Table, Container } from "react-bootstrap";
 import axios from "axios";
 // import { BsSearch } from "react-icons/bs";
 import SpinnerComponent from "../../../components/UI/SpinnerComponent";
-import "./Data.json";
 import TableFooter from "../Table/TableFooter";
 import useTable from "../Hooks/useTable";
 import Config from "../../../config/Config.json";

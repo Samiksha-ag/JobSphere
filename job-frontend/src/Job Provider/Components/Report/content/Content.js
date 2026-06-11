@@ -24,10 +24,10 @@ function Reports() {
   const { slice, range } = useTable(reportsData, page, 5);
 
   const [forminputs, setFormInputs] = useState({});
-  const [filterdates, setFilterDates] = useState({
+  const setFilterDates = useState({
     startdate: "",
     enddate: "",
-  });
+  })[1];
 
   const [errors, setErrors] = useState({});
 
@@ -110,12 +110,8 @@ function Reports() {
     let stdate = new Date(forminputs.startdate);
     let endate = new Date(forminputs.enddate);
     let newData = reportsData.filter((report) => {
-      // console.log(report);
       let date = new Date(report.startDate);
-      if (date >= stdate && date <= endate) {
-        return report;
-      }
-      // return;
+      return date >= stdate && date <= endate;
     });
     // console.log(newData);
     setReportsData(newData);

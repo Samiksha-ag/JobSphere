@@ -105,8 +105,8 @@ const AddUserForm = (props) => {
         <div className={classes.formInputs}>
           <label htmlFor="role">Role</label>
           <select name="role" id="role" ref={roleInputRef}>
-            <option value="Job Provider">Job Provider</option>
-            <option value="User">User</option>
+            <option value="Job Provider">Recruiter</option>
+            <option value="User">Applicant</option>
           </select>
         </div>
         <button className={classes.submitBtn} type="submit">

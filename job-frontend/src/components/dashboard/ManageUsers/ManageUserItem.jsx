@@ -1,6 +1,7 @@
 import axios from "axios";
 import classes from "./ManageUserItem.module.css";
 import dateFormatter from "../../../util/dateFormatter";
+import roleLabel from "../../../utils/roleLabel";
 import Config from "../../../config/Config.json";
 
 const ManageUserItem = (props) => {
@@ -26,7 +27,7 @@ const ManageUserItem = (props) => {
       <td>{props.userInfo.name}</td>
       <td>{props.userInfo.email}</td>
       <td>{props.userInfo.mobile}</td>
-      <td>{props.userInfo.role}</td>
+      <td>{roleLabel(props.userInfo.role)}</td>
       <td>{dateFormatter(props.userInfo.createdAt)}</td>
       <td className={classes.actions}>
         <button

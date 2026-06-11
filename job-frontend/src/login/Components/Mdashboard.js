@@ -6,26 +6,15 @@ import JobSeekerScreen from "../../JobSeekerScreen";
 import jwtDecode from "jwt-decode";
 
 function Mdashboard() {
-  // const dispatch = useDispatch();
-  const selectauthToken = (rootstate) => rootstate.authToken;
+  // Subscribe to the auth token in the store so this component re-renders
+  // when the user logs in or out.
+  useSelector((state) => state.authToken);
 
   const authToken = localStorage.getItem("token");
-  const redToken = useSelector(selectauthToken);
-
-  // if(redToken == {}){
-  //   if(authToken){
-  //     dispatch({type:"SETAUTHTOKEN",data:authToken});
-  //   }
-  // }
-
-  // if (authToken !== null && redAuthToken == {}) {
-  //   dispatch({ type: "SETAUTHTOKEN", data: authToken });
-  // }
 
   if (authToken) {
     try {
       const redAuthToken = jwtDecode(authToken);
-      // console.log("lol", decoded);
       if (redAuthToken.role === "Admin") {
         return <AdminScreen />;
       }
