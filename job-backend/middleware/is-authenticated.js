@@ -12,7 +12,9 @@ module.exports = (req, res, next) => {
   try {
     decodedToken = jwt.verify(authToken, process.env.JWT_SECRET);
   } catch (err) {
-    err.statusCode = 500;
+    // Invalid/expired/tampered token is an auth failure, not a server error
+    err.statusCode = 401;
+    err.message = "Not Authenticated";
     throw err;
   }
   if (!decodedToken) {

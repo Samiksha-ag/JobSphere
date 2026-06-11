@@ -6,6 +6,7 @@ import App from "./App";
 import { createStore } from "redux";
 import { Provider } from "react-redux";
 import rootReducer from "./login/Reducers/rootReducer";
+import "./utils/axiosConfig";
 
 const store = createStore(rootReducer);
 
