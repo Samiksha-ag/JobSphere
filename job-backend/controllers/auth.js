@@ -68,7 +68,7 @@ exports.login = (req, res, next) => {
           userName: loadedUser.name,
           role: loadedUser.role,
         },
-        "thisistooconfidential",
+        process.env.JWT_SECRET,
         { expiresIn: "1h" }
       );
 

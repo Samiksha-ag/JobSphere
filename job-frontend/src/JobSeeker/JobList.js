@@ -1,6 +1,8 @@
 import React from "react";
 import { useState, useEffect } from "react";
 import axios from "axios";
+import { io } from "socket.io-client";
+import jwtDecode from "jwt-decode";
 import Jobitem from "./Job_item";
 import ApplyModal from "./ApplyModal";
 import Config from "../config/Config.json";
@@ -28,6 +30,17 @@ const Jobs = () => {
       )
     );
   };
+
+  // Register user with socket for online status
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (token) {
+      const decoded = jwtDecode(token);
+      const socket = io("http://localhost:8080");
+      socket.emit("register", decoded.userId);
+      return () => socket.disconnect();
+    }
+  }, []);
 
   useEffect(() => {
     setLoading(true);
@@ -102,20 +115,14 @@ const Jobs = () => {
       boxShadow: "0 2px 10px rgba(0,0,0,0.05)",
       marginBottom: "30px",
     },
-    statItem: {
-      textAlign: "center",
-    },
+    statItem: { textAlign: "center" },
     statNumber: {
       fontSize: "28px",
       fontWeight: "800",
       color: "#0f3460",
       margin: 0,
     },
-    statLabel: {
-      fontSize: "13px",
-      color: "#718096",
-      margin: 0,
-    },
+    statLabel: { fontSize: "13px", color: "#718096", margin: 0 },
     jobsContainer: {
       maxWidth: "1200px",
       margin: "0 auto",
@@ -138,11 +145,7 @@ const Jobs = () => {
       color: "#718096",
       fontSize: "18px",
     },
-    emptyBox: {
-      textAlign: "center",
-      padding: "80px",
-      color: "#718096",
-    },
+    emptyBox: { textAlign: "center", padding: "80px", color: "#718096" },
     emptyEmoji: { fontSize: "60px", marginBottom: "16px" },
     emptyText: { fontSize: "20px", fontWeight: "600", color: "#2d3748" },
     emptySubtext: { fontSize: "14px", color: "#718096", marginTop: "8px" },
@@ -190,9 +193,7 @@ const Jobs = () => {
         </h2>
 
         {loading ? (
-          <div style={styles.loadingBox}>
-            ⏳ Loading jobs for you...
-          </div>
+          <div style={styles.loadingBox}>⏳ Loading jobs for you...</div>
         ) : jobs.length === 0 ? (
           <div style={styles.emptyBox}>
             <div style={styles.emptyEmoji}>🔍</div>
@@ -204,11 +205,7 @@ const Jobs = () => {
         ) : (
           <div style={styles.grid}>
             {jobs.map((jobItem) => (
-              <Jobitem
-                key={jobItem._id}
-                item={jobItem}
-                jobApply={jobApply}
-              />
+              <Jobitem key={jobItem._id} item={jobItem} jobApply={jobApply} />
             ))}
           </div>
         )}

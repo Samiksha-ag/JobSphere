@@ -23,16 +23,21 @@ function Mdashboard() {
   // }
 
   if (authToken) {
-    const redAuthToken = jwtDecode(authToken);
-    // console.log("lol", decoded);
-    if (redAuthToken.role === "Admin") {
-      return <AdminScreen />;
-    }
-    if (redAuthToken.role === "Job Provider") {
-      return <ProviderScreen />;
-    }
-    if (redAuthToken.role === "User") {
-      return <JobSeekerScreen />;
+    try {
+      const redAuthToken = jwtDecode(authToken);
+      // console.log("lol", decoded);
+      if (redAuthToken.role === "Admin") {
+        return <AdminScreen />;
+      }
+      if (redAuthToken.role === "Job Provider") {
+        return <ProviderScreen />;
+      }
+      if (redAuthToken.role === "User") {
+        return <JobSeekerScreen />;
+      }
+    } catch (err) {
+      // Malformed/corrupted token in storage — clear it and fall back to Login
+      localStorage.removeItem("token");
     }
   }
   return (

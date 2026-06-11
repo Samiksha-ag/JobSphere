@@ -6,11 +6,15 @@ function authTokenReducer(state = {}, action) {
     case "SETAUTHTOKEN":
       // console.log("in reducer setauthtoken");
       // console.log(action.data);
-      localStorage.setItem("token", action.data);
-
-      const decoded = jwtDecode(action.data);
-
-      return { ...decoded };
+      try {
+        const decoded = jwtDecode(action.data);
+        localStorage.setItem("token", action.data);
+        return { ...decoded };
+      } catch (err) {
+        // Malformed token — do not persist it; keep state cleared
+        localStorage.removeItem("token");
+        return {};
+      }
 
     case "CLEARAUTHTOKEN":
       localStorage.removeItem("token");

@@ -25,9 +25,7 @@ exports.getStats = (req, res, next) => {
       });
     })
     .catch((err) => {
-      if (!err.statusCode) {
-        err.statusCode = 500;
-      }
+      if (!err.statusCode) err.statusCode = 500;
       next(err);
     });
 };
@@ -38,17 +36,13 @@ exports.getRecents = (req, res, next) => {
     .limit(3)
     .lean()
     .then((jobs) => {
-      return res
-        .status(200)
-        .json({
-          message: "Successfully fetched the recent jobs",
-          recentJobs: jobs,
-        });
+      return res.status(200).json({
+        message: "Successfully fetched the recent jobs",
+        recentJobs: jobs,
+      });
     })
     .catch((err) => {
-      if (!err.statusCode) {
-        err.statusCode = 500;
-      }
+      if (!err.statusCode) err.statusCode = 500;
       next(err);
     });
 };
@@ -63,9 +57,7 @@ exports.getJobs = (req, res, next) => {
       });
     })
     .catch((err) => {
-      if (!err.statusCode) {
-        err.statusCode = 500;
-      }
+      if (!err.statusCode) err.statusCode = 500;
       next(err);
     });
 };
@@ -84,6 +76,7 @@ exports.addJob = (req, res, next) => {
     ...req.body,
     providerId: req.userId,
   });
+
   let jobId;
   newJob
     .save()
@@ -99,9 +92,7 @@ exports.addJob = (req, res, next) => {
       res.status(201).json({ message: "Job Added Successfully" });
     })
     .catch((err) => {
-      if (!err.statusCode) {
-        err.statusCode = 500;
-      }
+      if (!err.statusCode) err.statusCode = 500;
       next(err);
     });
 };
@@ -117,14 +108,10 @@ exports.getJob = (req, res, next) => {
         error.statusCode = 404;
         throw error;
       }
-      res
-        .status(200)
-        .json({ message: "Fetched the job Successfully", job: job });
+      res.status(200).json({ message: "Fetched the job Successfully", job: job });
     })
     .catch((err) => {
-      if (!err.statusCode) {
-        err.statusCode = 500;
-      }
+      if (!err.statusCode) err.statusCode = 500;
       next(err);
     });
 };
@@ -140,20 +127,22 @@ exports.editJob = (req, res, next) => {
     throw error;
   }
 
-  Job.findOneAndUpdate({ _id: jobId, providerId: req.userId }, req.body, {
-    useFindAndModify: false,
-  })
+  Job.findOneAndUpdate(
+    { _id: jobId, providerId: req.userId },
+    req.body,
+    { new: true }
+  )
     .then((data) => {
       if (!data) {
         res.status(404).json({
-          message: `Cannot update job with id=${id}. Maybe job was not found!`,
+          message: `Cannot update job with id=${jobId}. Maybe job was not found!`,
         });
-      } else res.status(200).json({ message: "Job was updated successfully." });
+      } else {
+        res.status(200).json({ message: "Job was updated successfully." });
+      }
     })
     .catch((err) => {
-      if (!err.statusCode) {
-        err.statusCode = 500;
-      }
+      if (!err.statusCode) err.statusCode = 500;
       next(err);
     });
 };
@@ -188,14 +177,10 @@ exports.deleteJob = (req, res, next) => {
     })
     .then((result) => {
       resumes.forEach((resume) => clearResume(resume));
-      res.json({
-        message: "Job record was deleted successfully!",
-      });
+      res.json({ message: "Job record was deleted successfully!" });
     })
     .catch((err) => {
-      if (!err.statusCode) {
-        err.statusCode = 500;
-      }
+      if (!err.statusCode) err.statusCode = 500;
       next(err);
     });
 };
@@ -209,14 +194,11 @@ exports.getApplicantsForJob = (req, res, next) => {
     jobId: jobId,
     status: { $regex: "Applied", $options: "i" },
   })
-    .populate("userId", "name")
+    .populate("userId", "name _id")
     .lean()
-
     .then((applicants) => {
       if (!applicants) {
-        return res
-          .status(200)
-          .json({ message: "Looks like no one has applied yet!" });
+        return res.status(200).json({ message: "Looks like no one has applied yet!" });
       }
       return res.status(200).json({
         message: "Successfully fetched the applicants",
@@ -224,12 +206,11 @@ exports.getApplicantsForJob = (req, res, next) => {
       });
     })
     .catch((err) => {
-      if (!err.statusCode) {
-        err.statusCode = 500;
-      }
+      if (!err.statusCode) err.statusCode = 500;
       next(err);
     });
 };
+
 exports.getShortlistsForJob = (req, res, next) => {
   const jobId = req.params.jobId;
   const providerId = req.userId;
@@ -241,12 +222,9 @@ exports.getShortlistsForJob = (req, res, next) => {
   })
     .populate("userId", "name email")
     .lean()
-
     .then((applicants) => {
       if (!applicants) {
-        return res
-          .status(200)
-          .json({ message: "Looks like no one has been shortlisted yet!" });
+        return res.status(200).json({ message: "Looks like no one has been shortlisted yet!" });
       }
       return res.status(200).json({
         message: "Successfully fetched the applicants",
@@ -254,9 +232,7 @@ exports.getShortlistsForJob = (req, res, next) => {
       });
     })
     .catch((err) => {
-      if (!err.statusCode) {
-        err.statusCode = 500;
-      }
+      if (!err.statusCode) err.statusCode = 500;
       next(err);
     });
 };
@@ -272,17 +248,13 @@ exports.getApplicantResume = (req, res, next) => {
       const resumeFile = applicant.resume;
       const resumePath = path.join(resumeFile);
       fs.readFile(resumePath, (err, data) => {
-        if (err) {
-          return next(err);
-        }
+        if (err) return next(err);
         res.setHeader("Content-type", "application/pdf");
         res.send(data);
       });
     })
     .catch((err) => {
-      if (!err.statusCode) {
-        err.statusCode = 500;
-      }
+      if (!err.statusCode) err.statusCode = 500;
       next(err);
     });
 };
@@ -309,7 +281,6 @@ exports.shortlistApplicant = (req, res, next) => {
       res.status(200).json({ message: "Shortlisted the candidate!" });
     })
     .catch((err) => {
-      // console.log(err);
       next(err);
     });
 };
@@ -331,14 +302,10 @@ exports.rejectApplicant = (req, res, next) => {
       return Applicant.findByIdAndDelete(applicantItemId);
     })
     .then((result) => {
-      return res
-        .status(200)
-        .json({ message: "Applicant rejected successfully!" });
+      return res.status(200).json({ message: "Applicant rejected successfully!" });
     })
     .catch((err) => {
-      if (!err.statusCode) {
-        err.statusCode = 500;
-      }
+      if (!err.statusCode) err.statusCode = 500;
       next(err);
     });
 };

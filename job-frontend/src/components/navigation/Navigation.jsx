@@ -1,16 +1,50 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Link, useNavigate, NavLink } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import jwtDecode from "jwt-decode";
+import Chat from "../Chat";
+import { getSocket, disconnectSocket } from "../../utils/socket";
 
 const Navigation = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
+  const [incomingChat, setIncomingChat] = useState(null);
+  const [showChat, setShowChat] = useState(false);
 
   const authToken = localStorage.getItem("token");
-  const redAuthToken = jwtDecode(authToken);
+  let redAuthToken;
+  try {
+    redAuthToken = jwtDecode(authToken);
+  } catch (err) {
+    redAuthToken = {};
+  }
+  const myUserId = redAuthToken.userId;
+
+  useEffect(() => {
+    if (!myUserId) return;
+    // Shared singleton socket, registered once for this user
+    const socket = getSocket(myUserId);
+
+    // Pop open a chat when a message arrives from someone else
+    const onReceive = (data) => {
+      if (data.senderId !== myUserId) {
+        setIncomingChat({
+          senderId: data.senderId,
+          senderName: data.senderName,
+        });
+        setShowChat(true);
+      }
+    };
+
+    socket.on("receiveMessage", onReceive);
+
+    return () => {
+      socket.off("receiveMessage", onReceive);
+    };
+  }, [myUserId]);
 
   const logoutHandler = () => {
+    disconnectSocket();
     dispatch({ type: "CLEARAUTHTOKEN" });
     navigate("/", { replace: true });
   };
@@ -86,6 +120,15 @@ const Navigation = () => {
       fontWeight: "600",
       cursor: "pointer",
     },
+    notificationDot: {
+      width: "10px",
+      height: "10px",
+      background: "#06d6a0",
+      borderRadius: "50%",
+      position: "absolute",
+      top: "0px",
+      right: "0px",
+    },
   };
 
   const getLinkStyle = ({ isActive }) =>
@@ -106,38 +149,22 @@ const Navigation = () => {
         <div style={styles.navLinks}>
           {redAuthToken.role === "Admin" && (
             <>
-              <NavLink to="/manage-users" style={getLinkStyle}>
-                👥 Users
-              </NavLink>
-              <NavLink to="/manage-jobs" style={getLinkStyle}>
-                💼 Jobs
-              </NavLink>
-              <NavLink to="/reports" style={getLinkStyle}>
-                📊 Reports
-              </NavLink>
+              <NavLink to="/manage-users" style={getLinkStyle}>👥 Users</NavLink>
+              <NavLink to="/manage-jobs" style={getLinkStyle}>💼 Jobs</NavLink>
+              <NavLink to="/reports" style={getLinkStyle}>📊 Reports</NavLink>
             </>
           )}
           {redAuthToken.role === "Job Provider" && (
             <>
-              <NavLink to="/manage-applicants" style={getLinkStyle}>
-                👥 Applicants
-              </NavLink>
-              <NavLink to="/manage-jobs" style={getLinkStyle}>
-                💼 Jobs
-              </NavLink>
-              <NavLink to="/provider-report" style={getLinkStyle}>
-                📊 Reports
-              </NavLink>
+              <NavLink to="/manage-applicants" style={getLinkStyle}>👥 Applicants</NavLink>
+              <NavLink to="/manage-jobs" style={getLinkStyle}>💼 Jobs</NavLink>
+              <NavLink to="/provider-report" style={getLinkStyle}>📊 Reports</NavLink>
             </>
           )}
           {redAuthToken.role === "User" && (
             <>
-              <NavLink to="/dashboard" style={getLinkStyle}>
-                🔍 Apply
-              </NavLink>
-              <NavLink to="/appliedJobs" style={getLinkStyle}>
-                📋 Applied Jobs
-              </NavLink>
+              <NavLink to="/dashboard" style={getLinkStyle}>🔍 Apply</NavLink>
+              <NavLink to="/appliedJobs" style={getLinkStyle}>📋 Applied Jobs</NavLink>
             </>
           )}
         </div>
@@ -153,8 +180,17 @@ const Navigation = () => {
         </div>
       </nav>
 
-      {/* Spacer to push content below fixed navbar */}
+      {/* Spacer */}
       <div style={{ height: "65px" }}></div>
+
+      {/* Chat Window for incoming messages */}
+      {showChat && incomingChat && (
+        <Chat
+          receiverId={incomingChat.senderId}
+          receiverName={incomingChat.senderName}
+          onClose={() => setShowChat(false)}
+        />
+      )}
     </>
   );
 };

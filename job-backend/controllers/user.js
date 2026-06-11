@@ -1,8 +1,5 @@
-// const { validationResult } = require("express-validator");
-
 const Job = require("../models/job");
 const Applicant = require("../models/applicant");
-
 const { clearResume } = require("../util/helper");
 const { dateFormatter } = require("../util/helper");
 
@@ -12,7 +9,10 @@ exports.getAvailableJobs = (req, res, next) => {
     .lean()
     .then((applicants) => {
       applicants.forEach((applicant) => appliedJobs.push(applicant.jobId));
-      return Job.find({ _id: { $not: { $in: appliedJobs } } }).lean();
+      const today = new Date();
+      return Job.find({
+        _id: { $not: { $in: appliedJobs } },
+      }).lean();
     })
     .then((jobs) => {
       res.status(200).json({
@@ -21,19 +21,17 @@ exports.getAvailableJobs = (req, res, next) => {
       });
     })
     .catch((err) => {
-      if (!err.statusCode) {
-        err.statusCode = 500;
-      }
+      if (!err.statusCode) err.statusCode = 500;
       next(err);
     });
 };
+
 exports.getAppliedJobs = (req, res, next) => {
   let appliedJobs = [];
   const statusMap = new Map();
   Applicant.find({ userId: req.userId })
     .lean()
     .then((applicants) => {
-      // console.log(applicants);
       applicants.forEach((applicant) => {
         appliedJobs.push(applicant.jobId);
         statusMap.set(applicant.jobId.toString(), applicant.status);
@@ -50,9 +48,7 @@ exports.getAppliedJobs = (req, res, next) => {
       });
     })
     .catch((err) => {
-      if (!err.statusCode) {
-        err.statusCode = 500;
-      }
+      if (!err.statusCode) err.statusCode = 500;
       next(err);
     });
 };
@@ -66,8 +62,7 @@ exports.applyJob = (req, res, next) => {
   const jobId = req.params.jobId;
   const userId = req.userId;
   const providerId = req.body.providerId;
-  const resume = req.file.path.replace("\\", "/");
-  let status;
+  const resume = req.file.path.replace(/\\/g, "/");
 
   Applicant.findOne({ jobId: jobId, userId: userId })
     .then((applicant) => {
@@ -77,13 +72,12 @@ exports.applyJob = (req, res, next) => {
           .status(409)
           .json({ message: "You have already applied for the job!" });
       }
-      status = "Applied on " + dateFormatter();
 
       const newApplicant = new Applicant({
         jobId: jobId,
         userId: userId,
         resume: resume,
-        status: status,
+        status: "Applied",
         providerId: providerId,
       });
       return newApplicant.save();
@@ -92,9 +86,7 @@ exports.applyJob = (req, res, next) => {
       res.status(201).json({ message: "Successfully applied for the job!" });
     })
     .catch((err) => {
-      if (!err.statusCode) {
-        err.statusCode = 500;
-      }
+      if (!err.statusCode) err.statusCode = 500;
       next(err);
     });
 };

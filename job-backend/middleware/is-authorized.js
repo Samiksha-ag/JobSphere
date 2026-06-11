@@ -24,7 +24,7 @@ exports.isAdmin = (req, res, next) => {
   if (req.role !== "Admin") {
     const err = new Error("Not Authorized");
     err.statusCode = 401;
-    next(err);
+    return next(err);
   }
   next();
 };
@@ -32,7 +32,7 @@ exports.isProvider = (req, res, next) => {
   if (req.role !== "Job Provider") {
     const err = new Error("Not Authorized");
     err.statusCode = 401;
-    next(err);
+    return next(err);
   }
   next();
 };
@@ -40,7 +40,7 @@ exports.isUser = (req, res, next) => {
   if (req.role !== "User") {
     const err = new Error("Not Authorized");
     err.statusCode = 401;
-    next(err);
+    return next(err);
   }
   next();
 };

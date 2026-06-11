@@ -16,7 +16,6 @@ let jobId;
 export default function ManageJobs() {
   const [showAddJobModal, setAddJobModal] = useState(false);
   const [action, setAction] = useState(false);
-
   const [showSpinner, setSpinner] = useState(false);
   const [showEditJobModal, setEditJobModal] = useState({
     show: false,
@@ -27,24 +26,20 @@ export default function ManageJobs() {
   const token = localStorage.getItem("token");
 
   const addJobHander = (values) => {
-    // console.log(values);
     setSpinner(true);
-
     axios
-      .post(`${Config.SERVER_URL + "admin/add-job"}`, values, {
+      .post(`${Config.SERVER_URL + "provider/add-job"}`, values, {
         headers: {
           Authorization: "Bearer " + token,
         },
       })
       .then((res) => {
-        // console.log(res);
         setSpinner(false);
         setAction(!action);
         setAddJobModal(false);
         toast.success(res.data.message);
       })
       .catch((err) => {
-        // console.log(err);
         setSpinner(false);
         toast.error("Oops something went wrong");
       });
@@ -63,11 +58,9 @@ export default function ManageJobs() {
       startDate: values.startDate,
       endDate: values.endDate,
     };
-    // console.log(editValues);
     setSpinner(true);
-
     axios
-      .put(`${Config.SERVER_URL + "admin/edit-job/" + jobId}`, editValues, {
+      .put(`${Config.SERVER_URL + "provider/edit-job/" + jobId}`, editValues, {
         headers: {
           Authorization: "Bearer " + token,
         },
@@ -76,14 +69,11 @@ export default function ManageJobs() {
         setEditJobModal((prev) => {
           return { show: false, inititalValues: prev.inititalValues };
         });
-
         setSpinner(false);
-
         setAction(!action);
         toast.success(res.data.message);
       })
       .catch((err) => {
-        // console.log(err);
         setSpinner(false);
         toast.error("Oops something went wrong");
       });
@@ -98,7 +88,7 @@ export default function ManageJobs() {
     setDeleteModal(false);
     setSpinner(true);
     axios
-      .delete(`${Config.SERVER_URL + "admin/jobs/" + jobId}`, {
+      .delete(`${Config.SERVER_URL + "provider/jobs/" + jobId}`, {
         headers: {
           Authorization: "Bearer " + token,
         },
@@ -109,15 +99,13 @@ export default function ManageJobs() {
         toast.success(result.data.message);
       })
       .catch((err) => {
-        // console.log(err);
         setSpinner(false);
         toast.error("Oops something went wrong");
       });
   };
+
   return (
     <>
-      {/* EDIT MODAL */}
-
       {showSpinner && (
         <Container className={classes.overlaySpinner}>
           <SpinnerComponent />
@@ -158,7 +146,6 @@ export default function ManageJobs() {
           ),
         }}
       </ReactModal>
-      {/* DELETE MODAL */}
       <ReactModal
         show={showDeleteModal}
         isDelete={true}

@@ -34,6 +34,10 @@ exports.getStats = (req, res, next) => {
         message: "Successfully fetched stats",
         stats: { jobCount, providerCount, applicantCount, seekerCount },
       });
+    })
+    .catch((err) => {
+      if (!err.statusCode) err.statusCode = 500;
+      next(err);
     });
 };
 
@@ -55,6 +59,10 @@ exports.getRecent = (req, res, next) => {
         recentUsers,
         recentJobs,
       });
+    })
+    .catch((err) => {
+      if (!err.statusCode) err.statusCode = 500;
+      next(err);
     });
 };
 
@@ -149,7 +157,7 @@ exports.editUser = (req, res, next) => {
     .then((data) => {
       if (!data) {
         res.status(404).json({
-          message: `Cannot update user with id=${id}. Maybe user was not found!`,
+          message: `Cannot update user with id=${userId}. Maybe user was not found!`,
         });
       } else
         res.status(200).json({ message: "User was updated successfully." });
@@ -181,7 +189,7 @@ exports.deleteUser = (req, res, next) => {
       if (!user) {
         const error = new Error("Cannot delete user. User not found!");
         error.statusCode = 404;
-        throw err;
+        throw error;
       }
       role = user.role;
       if (role === "Job Provider") {
@@ -318,7 +326,7 @@ exports.editJob = (req, res, next) => {
     .then((data) => {
       if (!data) {
         res.status(404).json({
-          message: `Cannot update job with id=${id}. Maybe job was not found!`,
+          message: `Cannot update job with id=${jobId}. Maybe job was not found!`,
         });
       } else res.status(200).json({ message: "Job was updated successfully." });
     })
@@ -341,7 +349,7 @@ exports.deleteJob = (req, res, next) => {
       if (!job) {
         const error = new Error("Cannot delete job. Job not found!");
         error.statusCode = 404;
-        throw err;
+        throw error;
       }
       providerId = job.providerId;
       return Job.findByIdAndDelete(jobId);
