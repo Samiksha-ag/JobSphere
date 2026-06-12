@@ -5,8 +5,10 @@ const pdfParse = require("pdf-parse");
 
 const Job = require("../models/job");
 const Applicant = require("../models/applicant");
+const User = require("../models/user");
 const s3 = require("../util/s3");
 const { computeAtsScore } = require("../util/ats");
+const { sendMail, templates } = require("../util/email");
 
 exports.getAvailableJobs = (req, res, next) => {
   let appliedJobs = [];
@@ -120,6 +122,13 @@ exports.applyJob = async (req, res, next) => {
       status: "Applied",
       providerId,
     }).save();
+
+    // Notify the applicant their application was received (non-blocking).
+    const applicant = await User.findById(userId).lean();
+    if (applicant) {
+      const mail = templates.applicationReceived(applicant.name, job.title);
+      sendMail({ to: applicant.email, ...mail });
+    }
 
     res.status(201).json({
       message: "Successfully applied for the job!",

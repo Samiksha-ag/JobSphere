@@ -8,6 +8,7 @@ const User = require("../models/user");
 
 const { removeResume } = require("../util/helper");
 const s3 = require("../util/s3");
+const { sendMail, templates } = require("../util/email");
 
 exports.getStats = (req, res, next) => {
   let jobsCount = 0;
@@ -273,7 +274,9 @@ exports.getApplicantResume = async (req, res, next) => {
 
 exports.shortlistApplicant = (req, res, next) => {
   const applicantItemId = req.params.applicantItemId;
-  Applicant.findById({ _id: applicantItemId })
+  Applicant.findById(applicantItemId)
+    .populate("userId", "name email")
+    .populate("jobId", "title")
     .then((applicant) => {
       if (!applicant) {
         return res.status(401).json({ message: "Applicant not found" });
@@ -287,10 +290,17 @@ exports.shortlistApplicant = (req, res, next) => {
         return res.status(409).json({ message: "Already shortlisted!" });
       }
       applicant.status = "Shortlisted";
-      return applicant.save();
-    })
-    .then((result) => {
-      res.status(200).json({ message: "Shortlisted the candidate!" });
+      return applicant.save().then(() => {
+        // Notify the candidate they were shortlisted (non-blocking).
+        if (applicant.userId && applicant.jobId) {
+          const mail = templates.shortlisted(
+            applicant.userId.name,
+            applicant.jobId.title
+          );
+          sendMail({ to: applicant.userId.email, ...mail });
+        }
+        res.status(200).json({ message: "Shortlisted the candidate!" });
+      });
     })
     .catch((err) => {
       next(err);
@@ -301,6 +311,8 @@ exports.rejectApplicant = (req, res, next) => {
   const applicantItemId = req.params.applicantItemId;
 
   Applicant.findById(applicantItemId)
+    .populate("userId", "name email")
+    .populate("jobId", "title")
     .then((applicant) => {
       if (!applicant) {
         return res.status(404).json({ message: "Applicant not found!" });
@@ -311,6 +323,14 @@ exports.rejectApplicant = (req, res, next) => {
         throw error;
       }
       removeResume(applicant.resume, applicant.storageType);
+      // Notify the candidate of the decision (non-blocking).
+      if (applicant.userId && applicant.jobId) {
+        const mail = templates.rejected(
+          applicant.userId.name,
+          applicant.jobId.title
+        );
+        sendMail({ to: applicant.userId.email, ...mail });
+      }
       return Applicant.findByIdAndDelete(applicantItemId);
     })
     .then((result) => {

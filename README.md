@@ -22,10 +22,10 @@ dashboard, and a JWT-secured, role-based access model.
 - **Analytics dashboard** — Recruiter dashboard with Bar, Pie, and Line charts (Recharts) summarizing jobs and applications.
 - **Admin console** — Manage users and jobs, view platform-wide stats, and export reports to CSV.
 - **Resume storage + ATS match** — Applicants upload a PDF resume; it is stored on **AWS S3** (with automatic local-disk fallback when S3 isn't configured). On submission the resume text is parsed and scored against the job posting, giving recruiters an **ATS-style keyword match %** per applicant.
+- **Email notifications** — Applicants receive emails on key events (application received, shortlisted, rejected) via Nodemailer. Sending is non-blocking and falls back to console logging when SMTP isn't configured.
 - **Dockerized** — Dockerfiles for frontend and backend plus a `docker-compose.yml` for one-command local orchestration.
 
 ### Planned (roadmap)
-- **Email notifications** (Nodemailer) on key events (apply, shortlist)
 - **Job recommendations** via a Python recommendation service
 - **PostgreSQL** alongside MongoDB for relational data
 - **Deployment** to AWS (EC2 + S3) with a CI/CD pipeline
@@ -123,6 +123,11 @@ AWS_SECRET_ACCESS_KEY=<iam-secret-key>
 The IAM user needs `s3:PutObject`, `s3:GetObject`, and `s3:DeleteObject` on the
 bucket. When these are present the app uploads to S3 automatically; when blank it
 falls back to local disk.
+
+### Enabling email notifications (optional)
+Set the `EMAIL_*` values in `job-backend/.env` (see `.env.example`). For Gmail,
+use an **App Password** (Google Account → Security → App passwords). When these
+are blank, the app logs emails to the console instead of sending them.
 
 ---
 
