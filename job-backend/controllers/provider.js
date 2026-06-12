@@ -6,7 +6,8 @@ const Job = require("../models/job");
 const Applicant = require("../models/applicant");
 const User = require("../models/user");
 
-const { clearResume } = require("../util/helper");
+const { removeResume } = require("../util/helper");
+const s3 = require("../util/s3");
 
 exports.getStats = (req, res, next) => {
   let jobsCount = 0;
@@ -167,8 +168,10 @@ exports.deleteJob = (req, res, next) => {
     .then((result) => {
       return Applicant.find({ jobId: jobId, providerId: req.userId }).then(
         (docs) => {
-          docs.forEach((doc) => resumes.push(doc.resume));
-          docs.forEach((doc) => applicants.push(doc._id));
+          docs.forEach((doc) => {
+            resumes.push({ resume: doc.resume, storageType: doc.storageType });
+            applicants.push(doc._id);
+          });
         }
       );
     })
@@ -176,7 +179,7 @@ exports.deleteJob = (req, res, next) => {
       return Applicant.deleteMany({ _id: { $in: applicants } });
     })
     .then((result) => {
-      resumes.forEach((resume) => clearResume(resume));
+      resumes.forEach((r) => removeResume(r.resume, r.storageType));
       res.json({ message: "Job record was deleted successfully!" });
     })
     .catch((err) => {
@@ -237,26 +240,35 @@ exports.getShortlistsForJob = (req, res, next) => {
     });
 };
 
-exports.getApplicantResume = (req, res, next) => {
-  const applicantId = req.params.applicantItemId;
-  Applicant.findOne({ _id: applicantId, providerId: req.userId })
-    .lean()
-    .then((applicant) => {
-      if (!applicant) {
-        return res.status(404).json({ message: "Applicant not found" });
-      }
-      const resumeFile = applicant.resume;
-      const resumePath = path.join(resumeFile);
-      fs.readFile(resumePath, (err, data) => {
-        if (err) return next(err);
-        res.setHeader("Content-type", "application/pdf");
-        res.send(data);
-      });
-    })
-    .catch((err) => {
-      if (!err.statusCode) err.statusCode = 500;
-      next(err);
-    });
+exports.getApplicantResume = async (req, res, next) => {
+  try {
+    const applicantId = req.params.applicantItemId;
+    const applicant = await Applicant.findOne({
+      _id: applicantId,
+      providerId: req.userId,
+    }).lean();
+    if (!applicant) {
+      return res.status(404).json({ message: "Applicant not found" });
+    }
+
+    res.setHeader("Content-Type", "application/pdf");
+
+    if (applicant.storageType === "s3") {
+      const stream = await s3.getObjectStream(applicant.resume);
+      stream.on("error", (err) => next(err));
+      return stream.pipe(res);
+    }
+
+    // Local fallback. Older records may store the path with or without the
+    // project-root prefix, so resolve relative to the backend directory.
+    const resumePath = path.join(__dirname, "..", applicant.resume);
+    fs.createReadStream(resumePath)
+      .on("error", () => res.status(404).json({ message: "Resume file not found" }))
+      .pipe(res);
+  } catch (err) {
+    if (!err.statusCode) err.statusCode = 500;
+    next(err);
+  }
 };
 
 exports.shortlistApplicant = (req, res, next) => {
@@ -298,7 +310,7 @@ exports.rejectApplicant = (req, res, next) => {
         error.statusCode = 401;
         throw error;
       }
-      clearResume(applicant.resume);
+      removeResume(applicant.resume, applicant.storageType);
       return Applicant.findByIdAndDelete(applicantItemId);
     })
     .then((result) => {

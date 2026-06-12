@@ -4,7 +4,7 @@ const bcryptjs = require("bcryptjs");
 const User = require("../models/user");
 const Job = require("../models/job");
 const Applicant = require("../models/applicant");
-const { clearResume } = require("../util/helper");
+const { removeResume } = require("../util/helper");
 
 exports.getStats = (req, res, next) => {
   let providerCount;
@@ -206,7 +206,7 @@ exports.deleteUser = (req, res, next) => {
       if (role === "Job Provider") {
         return Applicant.find({ providerId: userId }).then((docs) => {
           docs.forEach((doc) => {
-            resumes.push(doc.resume);
+            resumes.push({ resume: doc.resume, storageType: doc.storageType });
             applicants.push(doc._id);
           });
         });
@@ -214,7 +214,7 @@ exports.deleteUser = (req, res, next) => {
       if (role === "User") {
         return Applicant.find({ userId: userId }).then((docs) => {
           docs.forEach((doc) => {
-            resumes.push(doc.resume);
+            resumes.push({ resume: doc.resume, storageType: doc.storageType });
             applicants.push(doc._id);
           });
         });
@@ -224,7 +224,7 @@ exports.deleteUser = (req, res, next) => {
       return Applicant.deleteMany({ _id: { $in: applicants } });
     })
     .then((result) => {
-      resumes.forEach((resume) => clearResume(resume));
+      resumes.forEach((r) => removeResume(r.resume, r.storageType));
       res.json({
         message: "User record was deleted successfully!",
       });
@@ -362,15 +362,17 @@ exports.deleteJob = (req, res, next) => {
     })
     .then((result) => {
       return Applicant.find({ jobId: jobId }).then((docs) => {
-        docs.forEach((doc) => resumes.push(doc.resume));
-        docs.forEach((doc) => applicants.push(doc._id));
+        docs.forEach((doc) => {
+          resumes.push({ resume: doc.resume, storageType: doc.storageType });
+          applicants.push(doc._id);
+        });
       });
     })
     .then((result) => {
       return Applicant.deleteMany({ _id: { $in: applicants } });
     })
     .then((result) => {
-      resumes.forEach((resume) => clearResume(resume));
+      resumes.forEach((r) => removeResume(r.resume, r.storageType));
       res.json({
         message: "Job record was deleted successfully!",
       });

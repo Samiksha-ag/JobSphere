@@ -159,6 +159,7 @@ const ManageJobApplicants = () => {
           <thead style={styles.thead}>
             <tr>
               <th style={styles.th}>👤 Applicant Name</th>
+              <th style={styles.th}>🎯 ATS Match</th>
               <th style={styles.th}>📊 Status</th>
               <th style={styles.th}>⚡ Actions</th>
             </tr>

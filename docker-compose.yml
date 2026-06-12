@@ -11,6 +11,10 @@ services:
       - MONGO_URI=${MONGO_URI}
       - PORT=${PORT}
       - JWT_SECRET=${JWT_SECRET}
+      - AWS_REGION=${AWS_REGION}
+      - AWS_S3_BUCKET=${AWS_S3_BUCKET}
+      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
+      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
     volumes:
       - ./job-backend:/app
       - /app/node_modules

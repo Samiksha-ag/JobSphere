@@ -17,6 +17,15 @@ const applicantSchema = new Schema({
     type: String,
     required: true,
   },
+  storageType: {
+    type: String,
+    enum: ["s3", "local"],
+    default: "local",
+  },
+  atsScore: {
+    type: Number,
+    default: 0,
+  },
   status: {
     type: String,
     required: true,

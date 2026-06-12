@@ -109,6 +109,30 @@ const ApplicantItem = ({ setAction, ...props }) => {
           </span>
         </td>
         <td style={styles.td}>
+          {(() => {
+            const score = props.applicantItem.atsScore ?? 0;
+            const color =
+              score >= 70 ? "#276749" : score >= 40 ? "#9c6a00" : "#c53030";
+            const bg =
+              score >= 70 ? "#f0fff4" : score >= 40 ? "#fffaf0" : "#fff5f5";
+            return (
+              <span
+                style={{
+                  padding: "4px 12px",
+                  borderRadius: "20px",
+                  fontSize: "12px",
+                  fontWeight: "700",
+                  background: bg,
+                  color: color,
+                }}
+                title="ATS keyword match between resume and job posting"
+              >
+                {score}% match
+              </span>
+            );
+          })()}
+        </td>
+        <td style={styles.td}>
           <span style={styles.statusBadge(props.applicantItem.status)}>
             {props.applicantItem.status === "Shortlisted" ? "⭐ Shortlisted" :
              props.applicantItem.status === "Rejected" ? "❌ Rejected" : "📋 Applied"}

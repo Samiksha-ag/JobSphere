@@ -21,10 +21,10 @@ dashboard, and a JWT-secured, role-based access model.
 - **Real-time chat (Socket.io)** — Recruiters and applicants message each other live. Messages are persisted to MongoDB, so history survives refresh and reconnection. A single shared socket per user handles delivery and online presence.
 - **Analytics dashboard** — Recruiter dashboard with Bar, Pie, and Line charts (Recharts) summarizing jobs and applications.
 - **Admin console** — Manage users and jobs, view platform-wide stats, and export reports to CSV.
+- **Resume storage + ATS match** — Applicants upload a PDF resume; it is stored on **AWS S3** (with automatic local-disk fallback when S3 isn't configured). On submission the resume text is parsed and scored against the job posting, giving recruiters an **ATS-style keyword match %** per applicant.
 - **Dockerized** — Dockerfiles for frontend and backend plus a `docker-compose.yml` for one-command local orchestration.
 
 ### Planned (roadmap)
-- **Resume storage on AWS S3** + an ATS-style resume score checker
 - **Email notifications** (Nodemailer) on key events (apply, shortlist)
 - **Job recommendations** via a Python recommendation service
 - **PostgreSQL** alongside MongoDB for relational data
@@ -110,6 +110,19 @@ The app runs at `http://localhost:3000` and talks to the API at
 ```bash
 docker-compose up --build
 ```
+
+### Enabling AWS S3 for resumes (optional)
+Resume uploads work out of the box using local disk. To store them in S3 instead,
+set these in `job-backend/.env`:
+```
+AWS_REGION=<your-region>
+AWS_S3_BUCKET=<your-bucket-name>
+AWS_ACCESS_KEY_ID=<iam-access-key>
+AWS_SECRET_ACCESS_KEY=<iam-secret-key>
+```
+The IAM user needs `s3:PutObject`, `s3:GetObject`, and `s3:DeleteObject` on the
+bucket. When these are present the app uploads to S3 automatically; when blank it
+falls back to local disk.
 
 ---
 
