@@ -26,6 +26,14 @@ router.get(
   userController.getAppliedJobs
 );
 
+router.get(
+  "/recommendations",
+  isAuthenticated,
+  isAuthorized,
+  isUser,
+  userController.getRecommendations
+);
+
 router.post(
   "/apply/:jobId",
   isAuthenticated,

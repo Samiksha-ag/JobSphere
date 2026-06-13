@@ -15,6 +15,18 @@ function Jobitem({ item, jobApply }) {
         <Card.Title>
           <h4>{item.title} Role</h4>
         </Card.Title>
+        {typeof item.matchScore === "number" && (
+          <span
+            className="badge"
+            style={{
+              background: item.matchScore >= 50 ? "#06d6a0" : "#4361ee",
+              fontSize: "12px",
+            }}
+            title="How well this job matches your profile"
+          >
+            🎯 {item.matchScore}% match for you
+          </span>
+        )}
       </Card.Body>
       <ListGroup className="list-group-flush">
         <ListGroupItem>

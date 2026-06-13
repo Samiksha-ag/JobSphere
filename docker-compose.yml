@@ -20,9 +20,20 @@ services:
       - EMAIL_USER=${EMAIL_USER}
       - EMAIL_PASS=${EMAIL_PASS}
       - EMAIL_FROM=${EMAIL_FROM}
+      - AI_SERVICE_URL=http://job-ai:8000
     volumes:
       - ./job-backend:/app
       - /app/node_modules
+    depends_on:
+      - job-ai
+    restart: always
+
+  # Python Recommendation Service
+  job-ai:
+    build: ./job-ai
+    container_name: jobsphere-ai
+    ports:
+      - "8000:8000"
     restart: always
 
   # Frontend Service

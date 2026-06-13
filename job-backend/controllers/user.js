@@ -60,6 +60,76 @@ exports.getAppliedJobs = (req, res, next) => {
     });
 };
 
+exports.getRecommendations = async (req, res, next) => {
+  try {
+    const userId = req.userId;
+    const user = await User.findById(userId).lean();
+
+    // What the applicant has already applied to (signals their interests).
+    const applied = await Applicant.find({ userId })
+      .populate("jobId", "title category")
+      .lean();
+    const appliedJobIds = applied
+      .map((a) => a.jobId && a.jobId._id)
+      .filter(Boolean);
+    const appliedCategories = [
+      ...new Set(
+        applied.map((a) => a.jobId && a.jobId.category).filter(Boolean)
+      ),
+    ];
+    const appliedTitles = applied
+      .map((a) => a.jobId && a.jobId.title)
+      .filter(Boolean);
+
+    // Only recommend jobs they haven't applied to yet.
+    const candidateJobs = await Job.find({
+      _id: { $nin: appliedJobIds },
+    }).lean();
+    if (candidateJobs.length === 0) {
+      return res.status(200).json({ recommendations: [] });
+    }
+
+    const profile = {
+      qualification: user ? user.qualification : "",
+      experience: user ? user.experience : "",
+      appliedCategories,
+      appliedTitles,
+      interests: [],
+    };
+
+    // Ask the Python recommendation service to rank the candidate jobs.
+    const aiUrl = process.env.AI_SERVICE_URL || "http://localhost:8000";
+    let ranked = [];
+    try {
+      const resp = await fetch(`${aiUrl}/recommend`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ profile, jobs: candidateJobs, topN: 5 }),
+      });
+      if (resp.ok) {
+        const data = await resp.json();
+        ranked = data.recommendations || [];
+      }
+    } catch (e) {
+      // AI service down — degrade gracefully, no recommendations.
+      console.log("AI service unavailable:", e.message);
+    }
+
+    const jobMap = new Map(candidateJobs.map((j) => [j._id.toString(), j]));
+    const recommendations = ranked
+      .map((r) => {
+        const job = jobMap.get(r.jobId);
+        return job ? { ...job, matchScore: r.score } : null;
+      })
+      .filter(Boolean);
+
+    res.status(200).json({ recommendations });
+  } catch (err) {
+    if (!err.statusCode) err.statusCode = 500;
+    next(err);
+  }
+};
+
 exports.applyJob = async (req, res, next) => {
   try {
     if (!req.file) {

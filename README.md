@@ -23,10 +23,10 @@ dashboard, and a JWT-secured, role-based access model.
 - **Admin console** — Manage users and jobs, view platform-wide stats, and export reports to CSV.
 - **Resume storage + ATS match** — Applicants upload a PDF resume; it is stored on **AWS S3** (with automatic local-disk fallback when S3 isn't configured). On submission the resume text is parsed and scored against the job posting, giving recruiters an **ATS-style keyword match %** per applicant.
 - **Email notifications** — Applicants receive emails on key events (application received, shortlisted, rejected) via Nodemailer. Sending is non-blocking and falls back to console logging when SMTP isn't configured.
-- **Dockerized** — Dockerfiles for frontend and backend plus a `docker-compose.yml` for one-command local orchestration.
+- **Job recommendations (Python microservice)** — A standalone **FastAPI** service ranks jobs for each applicant using **content-based filtering (TF-IDF + cosine similarity)** over the job text vs. the applicant's profile and application history. The Node API calls it and shows a "Recommended For You" section with a match score; if the service is offline the app degrades gracefully.
+- **Dockerized** — Dockerfiles for frontend, backend, and the Python service plus a `docker-compose.yml` for one-command local orchestration.
 
 ### Planned (roadmap)
-- **Job recommendations** via a Python recommendation service
 - **PostgreSQL** alongside MongoDB for relational data
 - **Deployment** to AWS (EC2 + S3) with a CI/CD pipeline
 
@@ -37,7 +37,8 @@ dashboard, and a JWT-secured, role-based access model.
 | Layer | Technologies |
 |-------|--------------|
 | Frontend | React 17, React Router 6, Redux, Formik + Yup, Recharts, Axios, React-Bootstrap, socket.io-client |
-| Backend | Node.js, Express 4, Socket.io 4, Mongoose 6, JWT, bcryptjs, Multer |
+| Backend | Node.js, Express 4, Socket.io 4, Mongoose 6, JWT, bcryptjs, Multer, Nodemailer, AWS SDK v3 |
+| AI service | Python, FastAPI, scikit-learn (TF-IDF + cosine similarity) |
 | Database | MongoDB (Atlas) |
 | Tooling | Docker, docker-compose |
 
@@ -59,6 +60,10 @@ job-portal-project/
 │       ├── components/      Shared UI, navigation, dashboard, chat
 │       ├── utils/          Shared socket, axios config, role labels
 │       └── login/          Auth screens + Redux store
+├── job-ai/                 Python FastAPI recommendation service
+│   ├── main.py             API (/health, /recommend)
+│   ├── recommender.py      TF-IDF + cosine similarity ranking
+│   └── requirements.txt
 └── docker-compose.yml
 ```
 
@@ -110,6 +115,17 @@ The app runs at `http://localhost:3000` and talks to the API at
 ```bash
 docker-compose up --build
 ```
+
+### 3. Recommendation service (optional, for personalized jobs)
+```bash
+cd job-ai
+python -m venv venv
+venv\Scripts\activate          # Windows  (use: source venv/bin/activate on macOS/Linux)
+pip install -r requirements.txt
+uvicorn main:app --port 8000
+```
+The Node backend reads `AI_SERVICE_URL` (default `http://localhost:8000`). If the
+service isn't running, the app simply shows no recommendations.
 
 ### Enabling AWS S3 for resumes (optional)
 Resume uploads work out of the box using local disk. To store them in S3 instead,

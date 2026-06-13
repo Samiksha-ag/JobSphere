@@ -12,6 +12,7 @@ const Jobs = () => {
   const [action, setAction] = useState(false);
   const [jobSet, setjobSet] = useState("");
   const [jobs, setJobs] = useState([]);
+  const [recommended, setRecommended] = useState([]);
   const [loading, setLoading] = useState(true);
 
   const closeModalHandler = () => setModal(false);
@@ -46,6 +47,21 @@ const Jobs = () => {
         console.log(err);
         setLoading(false);
       });
+  }, [action]);
+
+  // Personalized recommendations from the Python AI service (optional).
+  useEffect(() => {
+    axios
+      .get(`${Config.SERVER_URL + "user/recommendations"}`, {
+        headers: { Authorization: "Bearer " + localStorage.getItem("token") },
+      })
+      .then((res) => {
+        const recs = (res.data.recommendations || []).filter(
+          (r) => r.matchScore > 0
+        );
+        setRecommended(recs);
+      })
+      .catch((err) => console.log(err));
   }, [action]);
 
   const styles = {
@@ -172,6 +188,25 @@ const Jobs = () => {
           <p style={styles.statLabel}>Quick Apply</p>
         </div>
       </div>
+
+      {/* Recommended For You */}
+      {recommended.length > 0 && (
+        <div style={styles.jobsContainer}>
+          <h2 style={styles.sectionTitle}>
+            🎯 Recommended For You ({recommended.length})
+          </h2>
+          <div style={styles.grid}>
+            {recommended.map((jobItem) => (
+              <Jobitem
+                key={`rec-${jobItem._id}`}
+                item={jobItem}
+                jobApply={jobApply}
+              />
+            ))}
+          </div>
+          <hr style={{ margin: "32px 0" }} />
+        </div>
+      )}
 
       {/* Jobs Grid */}
       <div style={styles.jobsContainer}>
